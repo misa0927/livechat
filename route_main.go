@@ -13,11 +13,12 @@ func err(writer http.ResponseWriter, request *http.Request) {
   } else {
     generateHTML(writer, vals.Get("msg"), "layout", "private.navbar", "error")
   }
+}
 
 
-func index(writer http.Responsewriter, request *http.Request) {
+func index(writer http.ResponseWriter, request *http.Request) {
   threads, err := data.Threads()
-  if err == nil{
+  if err != nil{
     error_message(writer, request, "Cannot get threads")
   } else {
     _, err := session(writer, request)

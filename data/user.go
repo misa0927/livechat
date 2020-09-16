@@ -43,7 +43,7 @@ func (user *User) Session() (session Session, err error) {
 
 
 func (session *Session) Check() (valid bool, err error) {
-  err = Db,QueryRow("SELECT id, uuid, email, user_id, created_at FROM sessions WHERE uuid = $1", session.Uuid).
+  err = Db.QueryRow("SELECT id, uuid, email, user_id, created_at FROM sessions WHERE uuid = $1", session.Uuid).
     Scan(&session.Id, &session.Uuid, &session.Email, &session.UserId, &session.CreatedAt)
   if err != nil {
     valid = false
@@ -64,9 +64,52 @@ func (session *Session) DeleteByUUID() (err error) {
   }
   defer stmt.Close()
 
+  _, err = stmt.Exec(session.Uuid)
+  return
+}
+
+
+func (session *Session) User() (user User, err error) {
+  user = User{}
+  err = Db.QueryRow("SELECT id, uuid, name, email, created_at FROM users WHERE id =$1", session.UserId).
+    Scan(&user.Id, &user.Name, &user.Email, &user.CreatedAt)
+  return
+}
+
+
+func SessionDeleteAll() (err error) {
+  statement := "delete from sessions"
+  _, err = Db.Exec(statement)
+  return
+}
+
+
+func (user *User) Create() (err error) {
+  statement := "insert into users (uuid, name, email, password, created_at) values ($1, $2, $3, $4, $5) returning id, uuid, created_at"
+  stmt, err := Db.Prepare(statement)
+  if err != nil {
+    return
+  }
+  defer stmt.Close()
+
+  err = stmt.QueryRow(createUUID(), user.Name, user.Email, Encrypt(user.Password), time.Now()).Scan(&user.Id, &user.Uuid, &user.CreatedAt)
+  return
+}
+
+
+func (user *User) Delete() (err error) {
+  statement := "delete from users where id = $1"
+  stmt, err := Db.Prepare(statement)
+  if err !=nil {
+    return
+  }
+  defer stmt.Close()
+
   _, err = stmt.Exec(user.Id)
   return
 }
+
+
 
 
 func (user *User) Update() (err error) {
@@ -75,7 +118,7 @@ func (user *User) Update() (err error) {
   if err != nil {
     return
   }
-  defer stmt.CLose()
+  defer stmt.Close()
 
   _, err = stmt.Exec(user.Id, user.Name, user.Email)
   return

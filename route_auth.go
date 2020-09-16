@@ -8,7 +8,7 @@ import (
 
 
 func login(writer http.ResponseWriter, request *http.Request) {
-  t := parseTimelataFiles("login.layout", "public.navbar", "login")
+  t := parseTemplateFiles("login.layout", "public.navbar", "login")
   t.Execute(writer, nil)
 }
 
@@ -47,8 +47,8 @@ func authenticate(writer http.ResponseWriter, request *http.Request) {
       danger(err, "Cannot create session")
     }
     cookie := http.Cookie{
-      name: "_cookie",
-      value: session.Uuid,
+      Name: "_cookie",
+      Value: session.Uuid,
       HttpOnly: true,
     }
     http.SetCookie(writer, &cookie)
@@ -60,7 +60,7 @@ func authenticate(writer http.ResponseWriter, request *http.Request) {
 
 
 func logout(writer http.ResponseWriter, request *http.Request) {
-  cookie, err := request.CooKie("_cookie")
+  cookie, err := request.Cookie("_cookie")
   if err != http.ErrNoCookie {
     warning(err, "Failed to get cookie")
     session := data.Session{Uuid: cookie.Value}

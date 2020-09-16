@@ -19,7 +19,7 @@ func newThread(writer http.ResponseWriter, request *http.Request) {
 func createThread(writer http.ResponseWriter, request *http.Request) {
   sess, err := session(writer, request)
   if err != nil {
-    http,Redirect(writer, request, "/login", 302)
+    http.Redirect(writer, request, "/login", 302)
   } else {
     err = request.ParseForm()
     if err != nil {
@@ -28,6 +28,10 @@ func createThread(writer http.ResponseWriter, request *http.Request) {
     user, err := sess.User()
     if err != nil {
       danger(err, "Cannot get user from session")
+    }
+    topic := request.PostFormValue("topic")
+    if _, err := user.CreateThread(topic); err != nil {
+      danger(err, "Cannot create thread")
     }
     http.Redirect(writer, request, "/", 302)
   }
@@ -52,8 +56,9 @@ func readThread(writer http.ResponseWriter, request *http.Request) {
 
 
 func postThread(writer http.ResponseWriter, request *http.Request) {
-  sess, err := nil {
-    http.Redirect(writer, request, "login", 302)
+  sess, err := session(writer, request)
+  if err != nil {
+    http.Redirect(writer, request, "/login", 302)
   } else {
     err = request.ParseForm()
     if err != nil {
@@ -72,7 +77,7 @@ func postThread(writer http.ResponseWriter, request *http.Request) {
     if _, err := user.CreatePost(thread, body); err != nil {
       danger(err, "Cannot create post")
     }
-    url := fmt.Sprint("/thread/read?id=" uuid)
+    url := fmt.Sprint("/thread/read?id=", uuid)
     http.Redirect(writer, request, url, 302)
   }
 }

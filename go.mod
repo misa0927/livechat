@@ -1,4 +1,4 @@
-module livechat
+module github.com/misa0927/livechat
 
 go 1.15
 

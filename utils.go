@@ -26,7 +26,7 @@ var logger *log.Logger
 
 
 func p(a ...interface{}) {
-  fmt,Println(a)
+  fmt.Println(a)
 }
 
 
@@ -45,7 +45,8 @@ func loadConfig(){
   if err != nil {
     log.Fatalln("Cannot open config file", err)
   }
-  decoder = Configuration{}
+  decoder := json.NewDecoder(file)
+  config = Configuration{}
   err = decoder.Decode(&config)
   if err != nil {
     log.Fatalln("Cannot get configuration from file", err)
@@ -82,7 +83,7 @@ func parseTemplateFiles(filenames ...string) (t *template.Template) {
 }
 
 
-func generateHTML(writer, http.ResponseWriter, data interface{}, filenames...string) {
+func generateHTML(writer http.ResponseWriter, data interface{}, filenames...string) {
   var files []string
   for _, file := range filenames {
     files = append(files, fmt.Sprintf("templates/%s.html", file))

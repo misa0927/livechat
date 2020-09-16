@@ -8,9 +8,9 @@ import(
 func main(){
   p("LiveChat", version(), "started at", config.Address)
 
-  mux := http.NewSeverMux()
-  files := http.FileSever(http.Dir(config.Static)
-  mux.Handle("/static/", httpStripPrefix("/static/", files))
+  mux := http.NewServeMux()
+  files := http.FileServer(http.Dir(config.Static))
+  mux.Handle("/static/", http.StripPrefix("/static/", files))
 
   mux.HandleFunc("/", index)
   mux.HandleFunc("/err", err)
@@ -26,13 +26,13 @@ func main(){
   mux.HandleFunc("/thread/post", postThread)
   mux.HandleFunc("/thread/read", readThread)
 
-  sever := &http.Sever{
+  server := &http.Server{
     Addr:           config.Address,
     Handler:        mux,
-    ReadTimeout:    time,Duration(config.ReadTimeout * int64(time.Second)),
-    WriteTimeout:   time,Duration(config.WriteTimeout * int64(time.Second)),
-    MaxHeaderBytes: 1 << 20
+    ReadTimeout:    time.Duration(config.ReadTimeout * int64(time.Second)),
+    WriteTimeout:   time.Duration(config.WriteTimeout * int64(time.Second)),
+    MaxHeaderBytes: 1 << 20,
   }
-  sever.ListenAndserve()
+  server.ListenAndServe()
 }
 
